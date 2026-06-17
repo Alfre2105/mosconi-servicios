@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+@layer base {
+  body {
+    @apply font-sans text-gray-800;
+    background: linear-gradient(180deg, #b3d9f5 0%, #e8f4fd 40%, #f0f8ff 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  /* Botones */
+  .btn-primary {
+    @apply bg-[#1565C0] text-white font-bold py-3 px-6 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity w-full text-base shadow-md;
+  }
+  .btn-accent {
+    @apply bg-[#43A047] text-white font-bold py-3 px-6 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity w-full text-base shadow-md;
+  }
+  .btn-outline {
+    @apply border-2 border-[#1565C0] text-[#1565C0] font-bold py-3 px-6 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity w-full bg-white text-base;
+  }
+  .btn-whatsapp {
+    @apply bg-[#25D366] text-white font-bold py-3 px-6 rounded-2xl min-h-[52px] flex items-center justify-center gap-2 active:opacity-80 transition-opacity w-full text-base shadow-md;
+  }
+  .btn-contact-sm {
+    @apply bg-[#1565C0] text-white font-semibold py-2 px-4 rounded-xl min-h-[40px] flex items-center justify-center gap-1 text-sm shadow active:opacity-80 transition-opacity;
+  }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl shadow-md p-4;
+  }
+
+  /* Inputs */
+  .input {
+    @apply w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:ring-2 focus:ring-[#1565C0] min-h-[48px] bg-white;
+  }
+  .label {
+    @apply block text-sm font-semibold text-gray-700 mb-1;
+  }
+
+  /* Estrellas */
+  .star-filled { @apply text-yellow-400; }
+  .star-empty  { @apply text-gray-300; }
+
+  /* Badge */
+  .badge-chip {
+    @apply inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded-full;
+  }
+
+  /* Header de pantalla estilo mockup */
+  .page-header {
+    @apply relative text-white text-center px-4 pt-6 pb-5;
+    background: linear-gradient(180deg, #1565C0 0%, #1976D2 60%, #42a5f5 100%);
+  }
+  .page-title {
+    @apply text-2xl font-extrabold tracking-wide drop-shadow;
+    font-style: italic;
+  }
+  .page-subtitle {
+    @apply text-sm text-blue-100 mt-1;
+  }
+
+  /* Footer estándar */
+  .page-footer {
+    @apply text-center text-xs text-gray-500 py-4 px-4 border-t border-blue-100 bg-white/60;
+  }
+}
