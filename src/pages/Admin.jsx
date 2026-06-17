@@ -309,7 +309,18 @@ function ServiceRequests() {
             {r.comment && <p className="text-xs text-gray-500 italic">"{r.comment}"</p>}
             <div className="flex gap-2 flex-wrap mt-1">
               {STATUSES.filter(s => s !== r.status).map(s => (
-                <button key={s} onClick={async () => { await supabase.from('service_requests').update({ status: s }).eq('id', r.id); load() }}
+                <button key={s} onClick={async () => {
+                  await supabase.from('service_requests').update({ status: s }).eq('id', r.id)
+                  if (s === 'aceptado' && r.neighbors?.phone) {
+                    const num = r.neighbors.phone.replace(/\D/g, '')
+                    const number = num.startsWith('549') ? num : `549${num}`
+                    const msg = encodeURIComponent(
+                      `Hola ${r.neighbors.full_name}, te avisamos que ${r.workers?.full_name} aceptó tu solicitud de ${r.service_categories?.name ?? 'servicio'}. ¡Pronto se va a contactar con vos! — Mosconi Servicios`
+                    )
+                    window.open(`https://wa.me/${number}?text=${msg}`, '_blank')
+                  }
+                  load()
+                }}
                   className="text-xs px-3 py-1 border-2 border-[#1565C0] text-[#1565C0] rounded-full font-semibold bg-white">
                   Marcar {s}
                 </button>
