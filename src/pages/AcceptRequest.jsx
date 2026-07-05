@@ -12,32 +12,40 @@ export default function AcceptRequest() {
 
   useEffect(() => {
     async function accept() {
-      const { data: req, error } = await supabase
-        .from('service_requests')
-        .select('id, status, neighbor_id, worker_id')
-        .eq('id', id)
-        .maybeSingle()
+      try {
+        const { data: req, error } = await supabase
+          .from('service_requests')
+          .select('id, status, neighbor_id, worker_id')
+          .eq('id', id)
+          .maybeSingle()
 
-      if (error || !req) { setState('error'); return }
+        if (error || !req) { setState('error'); return }
 
-      const [{ data: neighbor }, { data: worker }] = await Promise.all([
-        supabase.from('neighbors').select('full_name, phone').eq('id', req.neighbor_id).single(),
-        supabase.from('workers').select('full_name, phone').eq('id', req.worker_id).single(),
-      ])
+        const [neighborRes, workerRes] = await Promise.all([
+          supabase.from('neighbors').select('full_name, phone').eq('id', req.neighbor_id).single(),
+          supabase.from('workers').select('full_name, phone').eq('id', req.worker_id).single(),
+        ])
 
-      const enriched = { ...req, neighbor, worker }
+        const enriched = {
+          ...req,
+          neighbor: neighborRes.data,
+          worker: workerRes.data,
+        }
 
-      if (req.status === 'aceptado') { setData(enriched); setState('already'); return }
+        if (req.status === 'aceptado') { setData(enriched); setState('already'); return }
 
-      const { error: updErr } = await supabase
-        .from('service_requests')
-        .update({ status: 'aceptado' })
-        .eq('id', id)
+        const { error: updErr } = await supabase
+          .from('service_requests')
+          .update({ status: 'aceptado' })
+          .eq('id', id)
 
-      if (updErr) { setState('error'); return }
+        if (updErr) { setState('error'); return }
 
-      setData(enriched)
-      setState('success')
+        setData(enriched)
+        setState('success')
+      } catch (e) {
+        setState('error')
+      }
     }
     accept()
   }, [id])
