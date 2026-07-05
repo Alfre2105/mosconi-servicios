@@ -47,7 +47,7 @@ export default function ServiceRequest() {
         neighbor_id = newN?.id
       }
 
-      await supabase.from('service_requests').insert({
+      const { data: reqData } = await supabase.from('service_requests').insert({
         neighbor_id,
         worker_id: id,
         service_category_id: form.service_category_id || null,
@@ -55,10 +55,9 @@ export default function ServiceRequest() {
         preferred_time: form.preferred_time || null,
         comment: form.comment || null,
         status: 'pendiente',
-      })
+      }).select('id').single()
 
       const serviceName = categories.find(c => c.id === form.service_category_id)?.name ?? 'servicio'
-      const { data: reqData } = await supabase.from('service_requests').select('id').eq('neighbor_id', neighbor_id).eq('worker_id', id).order('created_at', { ascending: false }).limit(1).single()
       const acceptLink = `https://mosconi-servicios-fwxc.vercel.app/aceptar/${reqData?.id}`
       const msg = encodeURIComponent(
         `Hola ${worker.full_name}, soy ${form.neighbor_name.trim()} (${form.neighbor_phone}) vecino/a de Mosconi.\n` +
