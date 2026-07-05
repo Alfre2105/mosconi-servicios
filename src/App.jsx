@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import Workers from './pages/Workers'
 import WorkerProfile from './pages/WorkerProfile'
 import ServiceRequest from './pages/ServiceRequest'
+import AcceptRequest from './pages/AcceptRequest'
 import Rate from './pages/Rate'
 import Admin from './pages/Admin'
 
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/trabajador/:id" element={<WorkerProfile />} />
       <Route path="/solicitar/:id" element={<ServiceRequest />} />
       <Route path="/calificar/:id" element={<Rate />} />
+      <Route path="/aceptar/:id" element={<AcceptRequest />} />
       <Route path="/admin" element={<Admin />} />
       <Route path="*" element={
         <div className="min-h-screen flex flex-col items-center justify-center gap-4 px-6 text-center">

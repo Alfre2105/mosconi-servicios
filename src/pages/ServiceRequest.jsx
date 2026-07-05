@@ -58,10 +58,13 @@ export default function ServiceRequest() {
       })
 
       const serviceName = categories.find(c => c.id === form.service_category_id)?.name ?? 'servicio'
+      const { data: reqData } = await supabase.from('service_requests').select('id').eq('neighbor_id', neighbor_id).eq('worker_id', id).order('created_at', { ascending: false }).limit(1).single()
+      const acceptLink = `https://mosconi-servicios-fwxc.vercel.app/aceptar/${reqData?.id}`
       const msg = encodeURIComponent(
         `Hola ${worker.full_name}, soy ${form.neighbor_name.trim()} (${form.neighbor_phone}) vecino/a de Mosconi.\n` +
         `Te solicito: ${serviceName}${form.preferred_date ? ` para el ${form.preferred_date}` : ''}${form.preferred_time ? ` a las ${form.preferred_time}` : ''}.\n` +
-        (form.comment ? `Detalle: ${form.comment}` : '')
+        (form.comment ? `Detalle: ${form.comment}\n` : '') +
+        `\nPara aceptar la solicitud hacé clic acá: ${acceptLink}`
       )
       const cleaned = worker.phone.replace(/\D/g, '')
       const number = cleaned.startsWith('549') ? cleaned : `549${cleaned}`
