@@ -7,10 +7,13 @@ import { WhatsAppButton } from '../components/WhatsAppButton'
 
 export default function AcceptRequest() {
   const { id } = useParams()
-  const [state, setState] = useState('loading') // loading | success | already | error
-  const [data, setData] = useState(null)
+  const [state, setState] = useState('loading')
+  const [whatsappHref, setWhatsappHref] = useState('')
+  const [neighborName, setNeighborName] = useState('')
 
   useEffect(() => {
+    if (!id) { setState('error'); return }
+
     async function accept() {
       try {
         const { data: req, error } = await supabase
@@ -26,13 +29,22 @@ export default function AcceptRequest() {
           supabase.from('workers').select('full_name, phone').eq('id', req.worker_id).single(),
         ])
 
-        const enriched = {
-          ...req,
-          neighbor: neighborRes.data,
-          worker: workerRes.data,
-        }
+        const neighbor = neighborRes.data
+        const worker = workerRes.data
 
-        if (req.status === 'aceptado') { setData(enriched); setState('already'); return }
+        if (neighbor) setNeighborName(neighbor.full_name ?? 'el vecino')
+
+        const phone = (neighbor?.phone ?? '').replace(/\D/g, '')
+        const number = phone.startsWith('549') ? phone : `549${phone}`
+        const workerName = worker?.full_name ?? 'El trabajador'
+        const nName = neighbor?.full_name ?? 'vecino/a'
+        const msg = encodeURIComponent(
+          `Hola ${nName}, soy ${workerName} de Mosconi Servicios.\n` +
+          `Acepté tu solicitud y me pongo en contacto para coordinar. ¿Cuándo te viene bien?`
+        )
+        setWhatsappHref(`https://wa.me/${number}?text=${msg}`)
+
+        if (req.status === 'aceptado') { setState('already'); return }
 
         const { error: updErr } = await supabase
           .from('service_requests')
@@ -41,26 +53,14 @@ export default function AcceptRequest() {
 
         if (updErr) { setState('error'); return }
 
-        setData(enriched)
         setState('success')
       } catch (e) {
         setState('error')
       }
     }
+
     accept()
   }, [id])
-
-  function whatsappNeighbor(req) {
-    const phone = req.neighbor?.phone?.replace(/\D/g, '')
-    const number = phone?.startsWith('549') ? phone : `549${phone}`
-    const workerName = req.worker?.full_name ?? 'El trabajador'
-    const neighborName = req.neighbor?.full_name ?? 'vecino/a'
-    const msg = encodeURIComponent(
-      `Hola ${neighborName}, soy ${workerName} de Mosconi Servicios.\n` +
-      `Acepté tu solicitud de servicio y me pongo en contacto para coordinar. ¿Cuándo te viene bien?`
-    )
-    return `https://wa.me/${number}?text=${msg}`
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -78,10 +78,10 @@ export default function AcceptRequest() {
             <div className="card w-full">
               <p className="font-bold text-gray-800 text-lg mb-1">¡Solicitud aceptada!</p>
               <p className="text-gray-600 text-sm leading-relaxed">
-                Avisale a <strong>{data?.neighbors?.full_name}</strong> que vas a atender su pedido.
+                Avisale a <strong>{neighborName}</strong> que vas a atender su pedido.
               </p>
             </div>
-            <WhatsAppButton href={whatsappNeighbor(data)}>
+            <WhatsAppButton href={whatsappHref}>
               Avisar al vecino por WhatsApp
             </WhatsAppButton>
           </>
@@ -96,7 +96,7 @@ export default function AcceptRequest() {
               <p className="font-bold text-gray-800 text-lg mb-1">Ya aceptaste esta solicitud</p>
               <p className="text-gray-600 text-sm">Podés igualmente contactar al vecino por WhatsApp.</p>
             </div>
-            <WhatsAppButton href={whatsappNeighbor(data)}>
+            <WhatsAppButton href={whatsappHref}>
               Contactar al vecino
             </WhatsAppButton>
           </>
