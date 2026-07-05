@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import emailjs from '@emailjs/browser'
 import { PageHeader } from '../components/PageHeader'
 import { Spinner } from '../components/Spinner'
 import { WhatsAppButton } from '../components/WhatsAppButton'
@@ -64,19 +65,20 @@ export default function ServiceRequest() {
       const serviceName = categories.find(c => c.id === form.service_category_id)?.name ?? 'servicio'
       const acceptLink = `https://mosconi-servicios-fwxc.vercel.app/aceptar/${requestId}`
 
-      fetch('/api/notificar-solicitud', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      emailjs.send(
+        'service_t9g6l0o',
+        'template_r2m1rcj',
+        {
           vecino: form.neighbor_name.trim(),
           telefono: form.neighbor_phone.trim(),
           trabajador: worker.full_name,
           servicio: serviceName,
-          fecha: form.preferred_date,
-          hora: form.preferred_time,
-          comentario: form.comment,
-        }),
-      }).catch(() => {})
+          fecha: form.preferred_date || '—',
+          hora: form.preferred_time || '—',
+          comentario: form.comment || '—',
+        },
+        '5okt81n2drMODL3QB'
+      ).catch(() => {})
       const msg = encodeURIComponent(
         `Hola ${worker.full_name}, soy ${form.neighbor_name.trim()} (${form.neighbor_phone}) vecino/a de Mosconi.\n` +
         `Te solicito: ${serviceName}${form.preferred_date ? ` para el ${form.preferred_date}` : ''}${form.preferred_time ? ` a las ${form.preferred_time}` : ''}.\n` +
