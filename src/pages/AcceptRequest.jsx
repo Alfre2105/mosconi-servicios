@@ -14,12 +14,20 @@ export default function AcceptRequest() {
     async function accept() {
       const { data: req, error } = await supabase
         .from('service_requests')
-        .select('*, neighbors(full_name, phone), workers(full_name, phone)')
+        .select('id, status, neighbor_id, worker_id')
         .eq('id', id)
         .maybeSingle()
 
       if (error || !req) { setState('error'); return }
-      if (req.status === 'aceptado') { setData(req); setState('already'); return }
+
+      const [{ data: neighbor }, { data: worker }] = await Promise.all([
+        supabase.from('neighbors').select('full_name, phone').eq('id', req.neighbor_id).single(),
+        supabase.from('workers').select('full_name, phone').eq('id', req.worker_id).single(),
+      ])
+
+      const enriched = { ...req, neighbor, worker }
+
+      if (req.status === 'aceptado') { setData(enriched); setState('already'); return }
 
       const { error: updErr } = await supabase
         .from('service_requests')
@@ -28,17 +36,17 @@ export default function AcceptRequest() {
 
       if (updErr) { setState('error'); return }
 
-      setData(req)
+      setData(enriched)
       setState('success')
     }
     accept()
   }, [id])
 
   function whatsappNeighbor(req) {
-    const phone = req.neighbors?.phone?.replace(/\D/g, '')
+    const phone = req.neighbor?.phone?.replace(/\D/g, '')
     const number = phone?.startsWith('549') ? phone : `549${phone}`
-    const workerName = req.workers?.full_name ?? 'El trabajador'
-    const neighborName = req.neighbors?.full_name ?? 'vecino/a'
+    const workerName = req.worker?.full_name ?? 'El trabajador'
+    const neighborName = req.neighbor?.full_name ?? 'vecino/a'
     const msg = encodeURIComponent(
       `Hola ${neighborName}, soy ${workerName} de Mosconi Servicios.\n` +
       `Acepté tu solicitud de servicio y me pongo en contacto para coordinar. ¿Cuándo te viene bien?`
