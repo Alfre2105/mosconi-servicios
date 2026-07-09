@@ -79,11 +79,13 @@ export default function ServiceRequest() {
         },
         '5okt81n2drMODL3QB'
       ).catch(() => {})
+      const completeLink = `https://mosconi-servicios-fwxc.vercel.app/completado/${requestId}`
       const msg = encodeURIComponent(
         `Hola ${worker.full_name}, soy ${form.neighbor_name.trim()} (${form.neighbor_phone}) vecino/a de Mosconi.\n` +
         `Te solicito: ${serviceName}${form.preferred_date ? ` para el ${form.preferred_date}` : ''}${form.preferred_time ? ` a las ${form.preferred_time}` : ''}.\n` +
         (form.comment ? `Detalle: ${form.comment}\n` : '') +
-        `\nPara aceptar la solicitud hacé clic acá: ${acceptLink}`
+        `\n✅ Aceptar solicitud: ${acceptLink}` +
+        `\n🏁 Marcar como completado: ${completeLink}`
       )
       const cleaned = worker.phone.replace(/\D/g, '')
       const number = cleaned.startsWith('549') ? cleaned : `549${cleaned}`
