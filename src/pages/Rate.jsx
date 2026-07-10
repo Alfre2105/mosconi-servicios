@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import emailjs from '@emailjs/browser'
 import { PageHeader } from '../components/PageHeader'
 import { StarPicker } from '../components/StarRating'
 import { Spinner } from '../components/Spinner'
@@ -41,6 +42,20 @@ export default function Rate() {
       await supabase.from('ratings').insert({
         worker_id: id, neighbor_id, stars, comment: comment.trim() || null, is_visible: stars > 2,
       })
+
+      emailjs.send(
+        'service_t9g6l0o',
+        'template_1bzaihc',
+        {
+          trabajador: worker?.full_name ?? '—',
+          vecino: name.trim(),
+          estrellas: `${stars}/5 ${'⭐'.repeat(stars)}`,
+          comentario: comment.trim() || '—',
+          estado: stars > 2 ? 'Publicada automáticamente' : 'Pendiente de revisión (calificación baja)',
+        },
+        '5okt81n2drMODL3QB'
+      ).catch(() => {})
+
       setSent(true)
     } catch (err) {
       setError('Error al enviar. Intentá de nuevo.')
