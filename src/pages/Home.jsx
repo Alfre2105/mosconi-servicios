@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { WhatsAppButton } from '../components/WhatsAppButton'
 import { whatsappAdminLink } from '../lib/whatsapp'
-import { HomeIllustration } from '../components/Illustrations'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -17,9 +16,14 @@ export default function Home() {
         />
       </div>
 
-      {/* Ilustración */}
-      <div className="px-4 pt-4 max-w-md mx-auto w-full">
-        <HomeIllustration />
+      {/* Foto hero */}
+      <div className="w-full max-w-md mx-auto px-4 pt-4">
+        <img
+          src="/hero.png"
+          alt="Vecinos y trabajadores del barrio General Mosconi"
+          className="w-full rounded-2xl object-cover shadow-md"
+          style={{ maxHeight: '220px' }}
+        />
       </div>
 
       {/* Contenido */}
