@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { PageHeader } from '../components/PageHeader'
 import { useCategories } from '../hooks/useCategories'
 import { supabase } from '../lib/supabase'
-import { RegisterIllustration } from '../components/Illustrations'
 
 const AVAILABILITY_OPTS = [
   { key: 'morning', label: 'Mañana' },
@@ -124,8 +123,9 @@ export default function Register() {
     <div className="min-h-screen flex flex-col">
       <PageHeader title="Registro de Trabajadores" subtitle="Sumate a la red comunitaria del barrio General Mosconi." />
 
-      <div className="px-4 pt-3 max-w-lg mx-auto w-full">
-        <RegisterIllustration />
+      <div className="w-full max-w-lg mx-auto px-4 pt-3">
+        <img src="/registrar.jpg" alt="Vecinos registrándose en Mosconi Servicios"
+          className="w-full rounded-2xl object-cover shadow-md" style={{ maxHeight: '200px' }} />
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-4 py-4 max-w-lg mx-auto w-full">

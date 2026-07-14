@@ -19,7 +19,7 @@ export default function Home() {
       {/* Foto hero */}
       <div className="w-full max-w-md mx-auto px-4 pt-4">
         <img
-          src="/hero.png"
+          src="/hero-nueva.jpg"
           alt="Vecinos y trabajadores del barrio General Mosconi"
           className="w-full rounded-2xl object-cover shadow-md"
           style={{ maxHeight: '220px' }}

@@ -6,7 +6,6 @@ import { FilterBar } from '../components/FilterBar'
 import { Spinner } from '../components/Spinner'
 import { useWorkers } from '../hooks/useWorkers'
 import { whatsappWorkerLink } from '../lib/whatsapp'
-import { WorkersIllustration } from '../components/Illustrations'
 
 export default function Workers() {
   const navigate = useNavigate()
@@ -22,8 +21,9 @@ export default function Workers() {
         subtitle="Encontrá vecinos disponibles para ayudarte en tu hogar."
       />
 
-      <div className="px-4 pt-3 max-w-lg mx-auto w-full">
-        <WorkersIllustration />
+      <div className="w-full max-w-lg mx-auto px-4 pt-3">
+        <img src="/trabajadores.jpg" alt="Trabajadores del barrio General Mosconi"
+          className="w-full rounded-2xl object-cover shadow-md" style={{ maxHeight: '200px' }} />
       </div>
 
       <main className="flex-1 px-4 py-4 max-w-lg mx-auto w-full flex flex-col gap-3">
