@@ -172,10 +172,14 @@ function ActiveWorkers() {
 
   async function load() {
     const [{ data: ws }, { data: bs }] = await Promise.all([
-      supabase.from('workers').select('*, worker_badges(badge_id, badges(name))').eq('is_verified', true).order('full_name'),
+      supabase.from('workers').select('*, worker_badges(badge_id, badges(name)), ratings(stars, is_visible)').eq('is_verified', true).order('full_name'),
       supabase.from('badges').select('*'),
     ])
-    setWorkers(ws ?? [])
+    setWorkers((ws ?? []).map(w => {
+      const visible = w.ratings?.filter(r => r.is_visible) ?? []
+      const avg = visible.length ? visible.reduce((s, r) => s + r.stars, 0) / visible.length : 0
+      return { ...w, ratings_count: visible.length, ratings_avg: avg }
+    }))
     setBadges(bs ?? [])
     setLoading(false)
   }
@@ -208,13 +212,35 @@ function ActiveWorkers() {
             </button>
           </div>
           <div>
-            <p className="text-xs text-gray-500 mb-1 font-semibold">Asignar insignia:</p>
+            <p className="text-xs text-gray-500 mb-1 font-semibold">Estado de confianza:</p>
+            <div className="flex gap-2">
+              <button
+                onClick={async () => { await supabase.from('workers').update({ badge_status: 'verificado' }).eq('id', w.id); load() }}
+                className={`text-xs px-3 py-1.5 rounded-full border-2 transition-colors font-semibold ${w.badge_status === 'verificado' ? 'bg-blue-100 border-[#1565C0] text-[#1565C0]' : 'bg-white border-gray-300 text-gray-600'}`}>
+                {w.badge_status === 'verificado' ? '✓ ' : ''}Verificado
+              </button>
+              <button
+                onClick={async () => { await supabase.from('workers').update({ badge_status: 'nuevo' }).eq('id', w.id); load() }}
+                className={`text-xs px-3 py-1.5 rounded-full border-2 transition-colors font-semibold ${w.badge_status === 'nuevo' ? 'bg-gray-200 border-gray-400 text-gray-700' : 'bg-white border-gray-300 text-gray-600'}`}>
+                {w.badge_status === 'nuevo' ? '✓ ' : ''}Nuevo
+              </button>
+            </div>
+            {w.badge_status === 'nuevo' && w.ratings_count >= 5 && w.ratings_avg >= 4 && (
+              <p className="text-xs text-orange-500 mt-1">Ojo: ya cumple el umbral de reseñas (promedio {w.ratings_avg.toFixed(1)}★). Si entra una reseña más, se gradúa a Verificado solo.</p>
+            )}
+          </div>
+          <div>
+            <p className="text-xs text-gray-500 mb-1 font-semibold">Insignias:</p>
             <div className="flex flex-wrap gap-2">
               {badges.map(b => {
                 const has = w.worker_badges?.some(wb => wb.badge_id === b.id)
                 return (
                   <button key={b.id}
-                    onClick={async () => { if (!has) { await supabase.from('worker_badges').upsert({ worker_id: w.id, badge_id: b.id, assigned_at: new Date().toISOString() }); load() } }}
+                    onClick={async () => {
+                      if (has) await supabase.from('worker_badges').delete().eq('worker_id', w.id).eq('badge_id', b.id)
+                      else await supabase.from('worker_badges').upsert({ worker_id: w.id, badge_id: b.id, assigned_at: new Date().toISOString() })
+                      load()
+                    }}
                     className={`text-xs px-3 py-1.5 rounded-full border-2 transition-colors font-semibold ${has ? 'bg-yellow-100 border-yellow-400 text-yellow-800' : 'bg-white border-gray-300 text-gray-600'}`}>
                     {has ? '✓ ' : ''}{b.name}
                   </button>

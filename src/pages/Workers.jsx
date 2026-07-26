@@ -77,6 +77,7 @@ export default function Workers() {
 
 function WorkerRow({ worker, onView }) {
   const services = worker.worker_services?.map(s => s.service_categories?.name).filter(Boolean)
+  const badges = worker.worker_badges?.map(b => b.badges?.name).filter(Boolean)
   const photo = worker.photo_url
 
   return (
@@ -102,6 +103,13 @@ function WorkerRow({ worker, onView }) {
             <span className="text-xs text-gray-400">({worker.rating_count})</span>
           )}
         </div>
+        {badges?.length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {badges.map(b => (
+              <span key={b} className="badge-chip"><span className="material-icons text-xs">verified</span>{b}</span>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Botón contactar */}
