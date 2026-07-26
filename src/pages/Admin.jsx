@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { StarDisplay } from '../components/StarRating'
+import { BadgeStatus } from '../components/BadgeStatus'
 import { Spinner } from '../components/Spinner'
 import { AdminIllustration } from '../components/Illustrations'
 
@@ -141,16 +142,23 @@ function PendingWorkers() {
             {w.description && <p className="text-sm text-gray-600 mt-1 italic">"{w.description}"</p>}
             <p className="text-xs text-gray-400 mt-1">{new Date(w.created_at).toLocaleString('es-AR')}</p>
           </div>
-          <div className="flex gap-2">
-            <button onClick={async () => { await supabase.from('workers').update({ is_verified: true }).eq('id', w.id); load() }}
-              className="btn-accent flex-1 py-2 text-sm min-h-[44px]">
-              <span className="material-icons text-base">check</span>Aprobar
-            </button>
-            <button onClick={async () => { if (!confirm('¿Eliminar?')) return; await supabase.from('workers').delete().eq('id', w.id); load() }}
-              className="flex-1 py-2 text-sm border-2 border-red-400 text-red-500 rounded-2xl font-bold flex items-center justify-center gap-1 min-h-[44px]">
-              <span className="material-icons text-base">close</span>Rechazar
-            </button>
+          <div>
+            <p className="text-xs text-gray-500 mb-1 font-semibold">Aprobar según rúbrica de confianza:</p>
+            <div className="flex gap-2">
+              <button onClick={async () => { await supabase.from('workers').update({ is_verified: true, badge_status: 'verificado' }).eq('id', w.id); load() }}
+                className="btn-accent flex-1 py-2 text-sm min-h-[44px]">
+                <span className="material-icons text-base">verified</span>Alta (Verificado)
+              </button>
+              <button onClick={async () => { await supabase.from('workers').update({ is_verified: true, badge_status: 'nuevo' }).eq('id', w.id); load() }}
+                className="flex-1 py-2 text-sm border-2 border-[#1565C0] text-[#1565C0] rounded-2xl font-bold flex items-center justify-center gap-1 min-h-[44px]">
+                <span className="material-icons text-base">fiber_new</span>Media (Nuevo)
+              </button>
+            </div>
           </div>
+          <button onClick={async () => { if (!confirm('¿Eliminar?')) return; await supabase.from('workers').delete().eq('id', w.id); load() }}
+            className="py-2 text-sm border-2 border-red-400 text-red-500 rounded-2xl font-bold flex items-center justify-center gap-1 min-h-[44px]">
+            <span className="material-icons text-base">close</span>Rechazar
+          </button>
         </div>
       ))}
     </div>
@@ -185,6 +193,7 @@ function ActiveWorkers() {
             <div>
               <p className="font-bold text-gray-900">{w.full_name}</p>
               <p className="text-sm text-gray-500">{w.phone}</p>
+              <div className="mt-1"><BadgeStatus status={w.badge_status} /></div>
               {w.worker_badges?.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {w.worker_badges.map(b => b.badges && (

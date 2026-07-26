@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { StarDisplay } from './StarRating'
+import { BadgeStatus } from './BadgeStatus'
 
 export function WorkerCard({ worker }) {
   const navigate = useNavigate()
@@ -23,6 +24,9 @@ export function WorkerCard({ worker }) {
         {services?.length > 0 && (
           <p className="text-sm text-gray-500 truncate">{services.slice(0, 3).join(' · ')}</p>
         )}
+        <div className="mt-1">
+          <BadgeStatus status={worker.badge_status} />
+        </div>
         <div className="flex items-center gap-2 mt-1">
           <StarDisplay value={worker.avg_rating} size="text-base" />
           <span className="text-sm text-gray-500">

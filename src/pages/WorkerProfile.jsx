@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { StarDisplay } from '../components/StarRating'
+import { BadgeStatus } from '../components/BadgeStatus'
 import { WhatsAppButton } from '../components/WhatsAppButton'
 import { Spinner } from '../components/Spinner'
 import { useWorker } from '../hooks/useWorkers'
@@ -53,6 +54,9 @@ export default function WorkerProfile() {
             {services?.length > 0 && (
               <p className="text-sm text-[#1565C0] font-semibold">{services[0]}</p>
             )}
+            <div className="mt-1">
+              <BadgeStatus status={worker.badge_status} />
+            </div>
             <div className="flex items-center gap-2 mt-1">
               <StarDisplay value={worker.avg_rating} />
               {worker.rating_count > 0 && (

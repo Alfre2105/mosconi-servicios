@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { PageHeader } from '../components/PageHeader'
 import { StarDisplay } from '../components/StarRating'
+import { BadgeStatus } from '../components/BadgeStatus'
 import { FilterBar } from '../components/FilterBar'
 import { Spinner } from '../components/Spinner'
 import { useWorkers } from '../hooks/useWorkers'
@@ -94,6 +95,7 @@ function WorkerRow({ worker, onView }) {
       <div className="flex-1 min-w-0 cursor-pointer" onClick={onView}>
         <p className="font-bold text-gray-900 truncate">{worker.full_name}</p>
         <p className="text-sm text-gray-500 truncate">{services?.slice(0, 2).join(', ') || '—'}</p>
+        <div className="mt-1"><BadgeStatus status={worker.badge_status} /></div>
         <div className="flex items-center gap-1 mt-0.5">
           <StarDisplay value={worker.avg_rating} size="text-sm" />
           {worker.avg_rating > 0 && (
