@@ -39,7 +39,7 @@ export default function CompleteRequest() {
         const number = phone.startsWith('549') ? phone : `549${phone}`
         const workerName = worker?.full_name ?? 'El trabajador'
         const nName = neighbor?.full_name ?? 'vecino/a'
-        const rateLink = `https://mosconi-servicios-fwxc.vercel.app/calificar/${req.worker_id}`
+        const rateLink = `https://mosconiservicios.vercel.app/calificar/${req.worker_id}`
         const msg = encodeURIComponent(
           `Hola ${nName}, soy ${workerName} de Mosconi Servicios.\n` +
           `Te aviso que el trabajo ha sido completado. ¡Gracias por confiar en nosotros!\n\n` +

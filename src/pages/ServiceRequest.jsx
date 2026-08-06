@@ -63,7 +63,7 @@ export default function ServiceRequest() {
       })
 
       const serviceName = categories.find(c => c.id === form.service_category_id)?.name ?? 'servicio'
-      const acceptLink = `https://mosconi-servicios-fwxc.vercel.app/aceptar/${requestId}`
+      const acceptLink = `https://mosconiservicios.vercel.app/aceptar/${requestId}`
 
       emailjs.send(
         'service_t9g6l0o',
@@ -79,7 +79,7 @@ export default function ServiceRequest() {
         },
         '5okt81n2drMODL3QB'
       ).catch(() => {})
-      const completeLink = `https://mosconi-servicios-fwxc.vercel.app/completado/${requestId}`
+      const completeLink = `https://mosconiservicios.vercel.app/completado/${requestId}`
       const msg = encodeURIComponent(
         `Hola ${worker.full_name}, soy ${form.neighbor_name.trim()} (${form.neighbor_phone}) vecino/a de Mosconi.\n` +
         `Te solicito: ${serviceName}${form.preferred_date ? ` para el ${form.preferred_date}` : ''}${form.preferred_time ? ` a las ${form.preferred_time}` : ''}.\n` +
