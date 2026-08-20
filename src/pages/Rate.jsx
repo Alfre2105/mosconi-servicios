@@ -1,54 +1,72 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import emailjs from '@emailjs/browser'
 import { PageHeader } from '../components/PageHeader'
 import { StarPicker } from '../components/StarRating'
 import { Spinner } from '../components/Spinner'
-import { useWorker } from '../hooks/useWorkers'
 import { supabase } from '../lib/supabase'
 import { RatingIllustration } from '../components/Illustrations'
 
 export default function Rate() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const { worker, loading } = useWorker(id)
+  const [state, setState] = useState('loading') // loading | invalid | form | sent
+  const [request, setRequest] = useState(null)
   const [stars, setStars] = useState(0)
   const [comment, setComment] = useState('')
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState(null)
 
-  if (loading) return <div className="min-h-screen flex flex-col"><PageHeader title="Calificación del servicio" /><Spinner /></div>
+  useEffect(() => {
+    if (!id) { setState('invalid'); return }
+
+    async function load() {
+      const { data: req, error: reqErr } = await supabase
+        .from('service_requests')
+        .select('id, status, worker_id, neighbor_id, neighbors(full_name, phone), workers(full_name)')
+        .eq('id', id)
+        .maybeSingle()
+
+      if (reqErr || !req || req.status !== 'completado') { setState('invalid'); return }
+
+      const { data: existingRating } = await supabase
+        .from('ratings')
+        .select('id')
+        .eq('request_id', id)
+        .maybeSingle()
+
+      if (existingRating) { setState('invalid'); return }
+
+      setRequest(req)
+      setState('form')
+    }
+    load()
+  }, [id])
 
   const starLabels = ['', 'Muy deficiente', 'Deficiente', 'Regular', 'Bueno', 'Excelente']
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (!stars) { setError('Seleccioná una calificación.'); return }
-    if (!name.trim() || !phone.trim()) { setError('Tu nombre y teléfono son necesarios.'); return }
     setError(null)
     setSubmitting(true)
     try {
-      let neighbor_id = null
-      const { data: existing } = await supabase.from('neighbors').select('id').eq('phone', phone.trim()).maybeSingle()
-      if (existing) {
-        neighbor_id = existing.id
-      } else {
-        const { data: newN } = await supabase.from('neighbors').insert({ full_name: name.trim(), phone: phone.trim(), role: 'neighbor' }).select('id').single()
-        neighbor_id = newN?.id
-      }
-      await supabase.from('ratings').insert({
-        worker_id: id, neighbor_id, stars, comment: comment.trim() || null, is_visible: stars > 2,
+      const { error: insertErr } = await supabase.from('ratings').insert({
+        worker_id: request.worker_id,
+        neighbor_id: request.neighbor_id,
+        request_id: request.id,
+        stars,
+        comment: comment.trim() || null,
+        is_visible: stars > 2,
       })
+      if (insertErr) throw insertErr
 
       emailjs.send(
         'service_t9g6l0o',
         'template_1bzaihc',
         {
-          trabajador: worker?.full_name ?? '—',
-          vecino: name.trim(),
+          trabajador: request.workers?.full_name ?? '—',
+          vecino: request.neighbors?.full_name ?? '—',
           estrellas: `${stars}/5 ${'⭐'.repeat(stars)}`,
           comentario: comment.trim() || '—',
           estado: stars > 2 ? 'Publicada automáticamente' : 'Pendiente de revisión (calificación baja)',
@@ -56,7 +74,7 @@ export default function Rate() {
         '5okt81n2drMODL3QB'
       ).catch(() => {})
 
-      setSent(true)
+      setState('sent')
     } catch (err) {
       setError('Error al enviar. Intentá de nuevo.')
     } finally {
@@ -64,11 +82,35 @@ export default function Rate() {
     }
   }
 
-  if (sent) {
+  if (state === 'loading') {
+    return <div className="min-h-screen flex flex-col"><PageHeader title="Calificación del servicio" /><Spinner /></div>
+  }
+
+  if (state === 'invalid') {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <PageHeader title="Calificación del servicio" />
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-4 text-center max-w-sm mx-auto w-full">
+          <span className="material-icons text-5xl text-gray-300">error_outline</span>
+          <p className="text-gray-600">
+            Este enlace no es válido, ya fue usado, o el servicio todavía no fue marcado como completado.
+          </p>
+          <button onClick={() => navigate('/')} className="btn-outline max-w-xs w-full">Inicio</button>
+        </div>
+        <footer className="page-footer">
+          <strong>Mosconi Servicios</strong> · Asociación Vecinal Mosconi KM3 Comodoro Rivadavia
+        </footer>
+      </div>
+    )
+  }
+
+  if (state === 'sent') {
     const adminNum = import.meta.env.VITE_WHATSAPP_ADMIN || '5492974000000'
     const starLabelsShort = ['', '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐']
+    const neighborName = request.neighbors?.full_name ?? ''
+    const workerName = request.workers?.full_name ?? ''
     const notifyAdminMsg = encodeURIComponent(
-      `Hola, soy ${name} y quiero informar que el trabajo de ${worker?.full_name} fue completado.\n` +
+      `Hola, soy ${neighborName} y quiero informar que el trabajo de ${workerName} fue completado.\n` +
       `Calificación: ${starLabelsShort[stars]} (${stars}/5)${comment ? `\nComentario: ${comment}` : ''}`
     )
     const notifyAdminLink = `https://wa.me/${adminNum}?text=${notifyAdminMsg}`
@@ -88,7 +130,7 @@ export default function Rate() {
               Notificar a la Asociación Vecinal
             </a>
           </div>
-          <button onClick={() => navigate(`/trabajador/${id}`)} className="btn-primary max-w-xs w-full">Ver perfil</button>
+          <button onClick={() => navigate(`/trabajador/${request.worker_id}`)} className="btn-primary max-w-xs w-full">Ver perfil</button>
           <button onClick={() => navigate('/')} className="btn-outline max-w-xs w-full">Inicio</button>
         </div>
         <footer className="page-footer">
@@ -113,8 +155,13 @@ export default function Rate() {
 
         <div className="card flex flex-col gap-3">
           <div>
-            <label className="label">Nombre del trabajador:</label>
-            <div className="input bg-gray-50 text-gray-600">{worker?.full_name ?? '...'}</div>
+            <label className="label">Trabajador:</label>
+            <div className="input bg-gray-50 text-gray-600">{request.workers?.full_name ?? '...'}</div>
+          </div>
+
+          <div>
+            <label className="label">Tu nombre:</label>
+            <div className="input bg-gray-50 text-gray-600">{request.neighbors?.full_name ?? '...'}</div>
           </div>
 
           <div>
@@ -134,18 +181,6 @@ export default function Rate() {
             <textarea className="input min-h-[90px] resize-none" value={comment}
               onChange={e => setComment(e.target.value)}
               placeholder="Contá tu experiencia..." />
-          </div>
-        </div>
-
-        <div className="card flex flex-col gap-3">
-          <h2 className="font-bold text-[#1565C0]">Tus datos</h2>
-          <div>
-            <label className="label">Tu nombre *</label>
-            <input className="input" value={name} onChange={e => setName(e.target.value)} required />
-          </div>
-          <div>
-            <label className="label">Tu teléfono *</label>
-            <input className="input" type="tel" value={phone} onChange={e => setPhone(e.target.value)} required />
           </div>
         </div>
 

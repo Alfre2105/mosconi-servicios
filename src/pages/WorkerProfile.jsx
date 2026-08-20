@@ -151,12 +151,6 @@ export default function WorkerProfile() {
             <span className="material-icons">send</span>
             Solicitar servicio
           </button>
-          {worker.accepts_rating && (
-            <button className="btn-outline" onClick={() => navigate(`/calificar/${worker.id}`)}>
-              <span className="material-icons">star_rate</span>
-              Calificar a {worker.full_name.split(' ')[0]}
-            </button>
-          )}
         </div>
       </main>
 
