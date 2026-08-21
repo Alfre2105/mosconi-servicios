@@ -67,7 +67,7 @@ export default function Rate() {
         {
           trabajador: request.workers?.full_name ?? '—',
           vecino: request.neighbors?.full_name ?? '—',
-          estrellas: `${stars}/5 ${'⭐'.repeat(stars)}`,
+          estrellas: `${stars}/5 ${'★'.repeat(stars)}`,
           comentario: comment.trim() || '—',
           estado: stars > 2 ? 'Publicada automáticamente' : 'Pendiente de revisión (calificación baja)',
         },
@@ -106,7 +106,7 @@ export default function Rate() {
 
   if (state === 'sent') {
     const adminNum = import.meta.env.VITE_WHATSAPP_ADMIN || '5492974000000'
-    const starLabelsShort = ['', '⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐']
+    const starLabelsShort = ['', '★', '★★', '★★★', '★★★★', '★★★★★']
     const neighborName = request.neighbors?.full_name ?? ''
     const workerName = request.workers?.full_name ?? ''
     const notifyAdminMsg = encodeURIComponent(
