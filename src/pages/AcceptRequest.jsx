@@ -46,10 +46,7 @@ export default function AcceptRequest() {
 
         if (req.status === 'aceptado') { setState('already'); return }
 
-        const { error: updErr } = await supabase
-          .from('service_requests')
-          .update({ status: 'aceptado' })
-          .eq('id', id)
+        const { error: updErr } = await supabase.rpc('accept_service_request', { p_id: id })
 
         if (updErr) { setState('error'); return }
 

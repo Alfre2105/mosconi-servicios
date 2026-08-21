@@ -49,10 +49,7 @@ export default function CompleteRequest() {
 
         if (req.status === 'completado') { setState('already'); return }
 
-        const { error: updErr } = await supabase
-          .from('service_requests')
-          .update({ status: 'completado' })
-          .eq('id', id)
+        const { error: updErr } = await supabase.rpc('complete_service_request', { p_id: id })
 
         if (updErr) { setState('error'); return }
 
